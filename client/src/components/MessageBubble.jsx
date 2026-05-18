@@ -21,7 +21,8 @@ export default function MessageBubble({ message, currentUser, isDm = false }) {
   }
 
   const isMe = message.fromUsername === currentUser || message.username === currentUser;
-  
+  const isBot = (message.fromUsername || message.username) === 'Aria';
+
   let bubbleClass = "glass-bubble-other";
   if (isMe) {
     bubbleClass = isDm ? "glass-bubble-dm" : "glass-bubble-mine";
@@ -80,18 +81,29 @@ export default function MessageBubble({ message, currentUser, isDm = false }) {
       `}</style>
 
       {/* Avatar */}
-      <img 
-        src={avatarUrl} 
-        alt={message.fromUsername || message.username}
-        style={{
-          width: '32px',
-          height: '32px',
-          borderRadius: '50%',
-          objectFit: 'cover',
-          border: '2px solid rgba(255,255,255,0.2)',
-          flexShrink: 0
-        }}
-      />
+      <div style={{ position: 'relative', flexShrink: 0 }}>
+        <img
+          src={avatarUrl}
+          alt={message.fromUsername || message.username}
+          style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            objectFit: 'cover',
+            border: isBot ? '2px solid rgba(99,102,241,0.6)' : '2px solid rgba(255,255,255,0.2)'
+          }}
+        />
+        {isBot && (
+          <span style={{
+            position: 'absolute', bottom: 0, right: 0,
+            background: 'var(--accent-mine)', color: 'white',
+            fontSize: '0.5rem', fontWeight: 700,
+            borderRadius: '3px', padding: '0 2px',
+            lineHeight: '10px', height: '10px',
+            border: '1px solid var(--surface-base)'
+          }}>AI</span>
+        )}
+      </div>
 
       {/* Content wrapper */}
       <div style={{ maxWidth: '75%' }}>
@@ -143,7 +155,7 @@ export default function MessageBubble({ message, currentUser, isDm = false }) {
           textAlign: isMe ? 'right' : 'left',
           padding: '0 4px'
         }}>
-          {isMe ? 'you' : (message.fromUsername || message.username)} · {formatTime(message.timestamp)}
+          {isMe ? 'you' : isBot ? 'Aria · AI' : (message.fromUsername || message.username)} · {formatTime(message.timestamp)}
         </div>
       </div>
 

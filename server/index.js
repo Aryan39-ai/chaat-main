@@ -6,9 +6,43 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const webPush = require('web-push');
+const Anthropic = require('@anthropic-ai/sdk');
 const User = require('./models/User');
 const Message = require('./models/Message');
 const Room = require('./models/Room');
+
+// ── AI Bot Configuration ──────────────────────────────────────────
+const BOT_USERNAME = 'Aria';
+const BOT_AVATAR = 'https://api.dicebear.com/7.x/thumbs/svg?seed=Aria-AI-Bot-Special';
+const BOT_SOCKET_ID = '__aria_bot__';
+const dmHistories = {};  // username → [{ role, content }] for per-user DM context
+
+const anthropic = process.env.ANTHROPIC_API_KEY
+  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  : null;
+
+async function getAriaReply(userMessage, history = []) {
+  if (!anthropic) return "I'm offline right now — ask an admin to configure my API key! 🤖";
+  try {
+    const messages = [
+      ...history.slice(-10),  // last 10 turns for context
+      { role: 'user', content: userMessage }
+    ];
+    const response = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 400,
+      system: `You are Aria, a friendly and witty AI chat companion living inside Chaat, a real-time chat app.
+You keep replies short (1-3 sentences), conversational, and fun.
+You can answer questions, chat casually, tell jokes, help with ideas, or just vibe with people.
+Never be preachy or overly formal. Use the occasional emoji. You are not an assistant — you are a chat friend.`,
+      messages
+    });
+    return response.content[0].text;
+  } catch (err) {
+    console.error('Aria AI error:', err.message);
+    return "Oops, my brain glitched for a sec 😅 Try again?";
+  }
+}
 
 // ── Web Push VAPID Configuration ─────────────────────────────────
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
@@ -56,6 +90,13 @@ const memoryMessages = [];
 const dmHistoryMap   = {};
 const memoryUsers    = {};
 const memoryGroups   = {}; // groupName → { name, isPrivate, passwordHash, members[], admins[], description, createdBy }
+
+// ── Register Aria bot as always-online ────────────────────────────
+onlineUsers[BOT_SOCKET_ID] = {
+  username: BOT_USERNAME, avatarUrl: BOT_AVATAR,
+  currentRoom: '#general', socketId: BOT_SOCKET_ID, isBot: true
+};
+roomSockets['#general'].add(BOT_SOCKET_ID);
 
 // ── Helpers ──────────────────────────────────────────────
 function getDmKey(a, b) { return [a, b].sort().join(':'); }
@@ -445,6 +486,23 @@ io.on('connection', (socket) => {
 
     io.to(user.currentRoom).emit('message', msgObj);
 
+    // ── Aria @mention handler ────────────────────────────────────
+    if (msgObj.type === 'text' && msgObj.text.toLowerCase().includes(`@${BOT_USERNAME.toLowerCase()}`)) {
+      const question = msgObj.text.replace(new RegExp(`@${BOT_USERNAME}`, 'gi'), '').trim() || msgObj.text;
+      const channelKey = `channel:${msgObj.room}`;
+      if (!dmHistories[channelKey]) dmHistories[channelKey] = [];
+      dmHistories[channelKey].push({ role: 'user', content: `${user.username} says: ${question}` });
+      const reply = await getAriaReply(`${user.username} says: ${question}`, dmHistories[channelKey].slice(0, -1));
+      dmHistories[channelKey].push({ role: 'assistant', content: reply });
+
+      const botMsg = {
+        room: user.currentRoom, username: BOT_USERNAME, fromUsername: BOT_USERNAME,
+        avatarUrl: BOT_AVATAR, type: 'text',
+        text: `@${user.username} ${reply}`, timestamp: new Date()
+      };
+      setTimeout(() => io.to(user.currentRoom).emit('message', botMsg), 600);
+    }
+
     // Push to offline members of private groups
     if (mongoConnected && VAPID_PUBLIC_KEY) {
       try {
@@ -476,6 +534,34 @@ io.on('connection', (socket) => {
       : Object.values(onlineUsers).find(u => u.username === toUsername) || null;
     const targetUsername = target?.username || toUsername;
     if (!targetUsername) return;
+
+    // ── Aria bot DM handler ──────────────────────────────────────
+    if (targetUsername === BOT_USERNAME && type !== 'image') {
+      const userMsg = text || '';
+      const dmKey = `dm:${sender.username}`;
+      if (!dmHistories[dmKey]) dmHistories[dmKey] = [];
+
+      const userDmObj = {
+        room: `${sender.username}:${BOT_USERNAME}`, username: sender.username,
+        fromUsername: sender.username, toUsername: BOT_USERNAME,
+        avatarUrl: sender.avatarUrl, type: 'dm', text: userMsg,
+        timestamp: new Date(), isDm: true
+      };
+      socket.emit('receive_dm', userDmObj);
+
+      dmHistories[dmKey].push({ role: 'user', content: userMsg });
+      const reply = await getAriaReply(userMsg, dmHistories[dmKey].slice(0, -1));
+      dmHistories[dmKey].push({ role: 'assistant', content: reply });
+
+      const botDmObj = {
+        room: `${sender.username}:${BOT_USERNAME}`, username: BOT_USERNAME,
+        fromUsername: BOT_USERNAME, toUsername: sender.username,
+        avatarUrl: BOT_AVATAR, type: 'dm', text: reply,
+        timestamp: new Date(), isDm: true
+      };
+      socket.emit('receive_dm', botDmObj);
+      return;
+    }
 
     const dmKey = getDmKey(sender.username, targetUsername);
     if (!dmHistoryMap[dmKey]) dmHistoryMap[dmKey] = [];

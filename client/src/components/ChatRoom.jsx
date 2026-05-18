@@ -481,10 +481,11 @@ export default function ChatRoom({ username, avatarUrl, onAvatarUpdate, onLogout
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {[...new Map(users.map(u => [u.username, u])).values()].map(u => {
               const isSelf = u.username === username;
+              const isBot = u.username === 'Aria';
               const unreadDm = unreadDmCounts[u.username] || 0;
               const isHovered = hoveredUser === u.username;
 
-              const userAvatar = u.avatarUrl || 
+              const userAvatar = u.avatarUrl ||
                 `https://api.dicebear.com/7.x/thumbs/svg?seed=${encodeURIComponent(u.username)}`;
 
               return (
@@ -498,46 +499,60 @@ export default function ChatRoom({ username, avatarUrl, onAvatarUpdate, onLogout
                     justifyContent: 'space-between',
                     padding: '8px',
                     borderRadius: '8px',
-                    background: isHovered ? 'var(--glass-bg)' : 'transparent',
-                    cursor: isSelf ? 'default' : 'pointer'
+                    background: isHovered ? 'var(--glass-bg)' : isBot ? 'rgba(99,102,241,0.08)' : 'transparent',
+                    cursor: isSelf ? 'default' : 'pointer',
+                    border: isBot ? '1px solid rgba(99,102,241,0.2)' : '1px solid transparent'
                   }}
                 >
                   <div className="flex-center" style={{ gap: '10px' }}>
                     <div style={{ position: 'relative' }}>
-                      <img 
-                        src={userAvatar} 
-                        alt={u.username} 
+                      <img
+                        src={userAvatar}
+                        alt={u.username}
                         style={{
                           width: '32px',
                           height: '32px',
                           borderRadius: '50%',
                           objectFit: 'cover',
-                          border: '2px solid rgba(255,255,255,0.2)'
+                          border: isBot ? '2px solid rgba(99,102,241,0.6)' : '2px solid rgba(255,255,255,0.2)'
                         }}
                       />
-                      <span className="status-dot-pulse" style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        right: 0,
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        background: '#22c55e',
-                        border: '1px solid var(--surface-base)'
-                      }} />
+                      {isBot ? (
+                        <span style={{
+                          position: 'absolute', bottom: 0, right: 0,
+                          background: 'var(--accent-mine)', color: 'white',
+                          fontSize: '0.5rem', fontWeight: 700,
+                          borderRadius: '4px', padding: '0 2px',
+                          lineHeight: '10px', height: '10px',
+                          border: '1px solid var(--surface-base)'
+                        }}>AI</span>
+                      ) : (
+                        <span className="status-dot-pulse" style={{
+                          position: 'absolute', bottom: 0, right: 0,
+                          width: '8px', height: '8px', borderRadius: '50%',
+                          background: '#22c55e', border: '1px solid var(--surface-base)'
+                        }} />
+                      )}
                     </div>
 
-                    <span style={{ 
-                      fontSize: '0.9rem', 
-                      fontWeight: 500,
-                      color: isSelf ? 'var(--accent-mine)' : 'var(--text-main)',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      maxWidth: '100px'
-                    }}>
-                      {u.username} {isSelf && <span style={{fontSize:'0.75rem', opacity:0.6}}>(you)</span>}
-                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                      <span style={{
+                        fontSize: '0.9rem',
+                        fontWeight: 500,
+                        color: isBot ? 'var(--accent-mine)' : isSelf ? 'var(--accent-mine)' : 'var(--text-main)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        maxWidth: '100px'
+                      }}>
+                        {u.username} {isSelf && <span style={{fontSize:'0.75rem', opacity:0.6}}>(you)</span>}
+                      </span>
+                      {isBot && (
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', lineHeight: 1 }}>
+                          DM me or @Aria in chat
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Unread DM indicator dot or Hover speech bubble button */}
