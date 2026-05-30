@@ -74,7 +74,7 @@ chaat/
 
 ---
 
-## 🔌 Core Socket Lifecycle Events
+## Core Socket Lifecycle Events
 
 | Event Name | Flow Direction | Payload / Role Description |
 | :--- | :--- | :--- |
@@ -93,7 +93,7 @@ chaat/
 
 ---
 
-## 💻 Local Development & Execution
+##  Local Development & Execution
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v16+ recommended)
@@ -119,7 +119,7 @@ npm run dev
 
 ---
 
-## 🌐 Deployment Configuration
+##  Deployment Configuration
 
 - **Frontend**: Directly deployable on **Vercel**. Ensure the root `vercel.json` maps builds to the `client/` subdirectory correctly, and set the production environment variable:
   ```env
