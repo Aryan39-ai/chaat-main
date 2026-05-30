@@ -1,4 +1,4 @@
-# 💬 Chaat — Full-Stack Real-Time Chat Application
+# Chaat — Full-Stack Real-Time Chat Application
 
 **Chaat** is a production-grade, highly responsive real-time chat application featuring a sleek **Glassmorphism** aesthetic, fully persistent messaging via **MongoDB**, robust authentication, multimedia attachments, custom channels, and private direct messaging.
 
@@ -7,29 +7,29 @@
 
 ---
 
-## 🚀 Live Demo
+##  Live Demo
 
 - **Frontend Application**: [https://chaat-seven.vercel.app](https://chaat-seven.vercel.app)
 - **Backend API Server**: [https://chaat-server-production.up.railway.app](https://chaat-server-production.up.railway.app)
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-- **🔒 Secure Authentication**: User registration and login flows with securely hashed passwords using `bcryptjs`. Seamless session restoration via `localStorage` with auto-reconnection on page refresh.
-- **📁 Multi-Room Channels**: Pre-configured defaults (`#general`, `#gaming`, `#music`, `#random`) alongside intuitive real-time **custom room creation**.
-- **💬 Rich Real-Time Messaging**: Powered by **Socket.io**. Supports full **Markdown** formatting (parsed and sanitized via `marked` + `DOMPurify`), rich-text rendering, file attachments, and embedded interactive previews.
-- **🖼️ Image & Avatar Uploads**: Native support for high-quality image attachments (up to 5MB) with full lightbox expansion. Configurable user profile avatars broadcast instantly to all connected clients.
-- **✉️ Private Direct Messages (DMs)**: Dedicated sliding overlay interface for secure private conversations with full historical chat logs.
-- **⌨️ Live Typing Indicators**: Real-time feedback displaying exactly who is currently typing within your active channel.
-- **🔔 Smart Audio Notifications**: Integrated **Web Audio API** triggers discrete sound chimes for incoming messages and DMs when your window tab is out of focus.
-- **🎨 Premium Visuals & Dark Mode**: Handcrafted pure CSS custom properties driving a highly polished **Glassmorphic** UI complete with smooth layout micro-animations and persistent theme toggling.
-- **📱 Fluid Mobile Experience**: Auto-collapsing bottom navigation bars, full-screen DM panels, and sliding drawer menus tailored beautifully for smaller viewports.
-- **🛡️ Database Resiliency**: Built-in automatic runtime failover to lightweight in-memory storage if remote MongoDB connections experience downtime.
+- **Secure Authentication**: User registration and login flows with securely hashed passwords using `bcryptjs`. Seamless session restoration via `localStorage` with auto-reconnection on page refresh.
+- **Multi-Room Channels**: Pre-configured defaults (`#general`, `#gaming`, `#music`, `#random`) alongside intuitive real-time **custom room creation**.
+- * Rich Real-Time Messaging**: Powered by **Socket.io**. Supports full **Markdown** formatting (parsed and sanitized via `marked` + `DOMPurify`), rich-text rendering, file attachments, and embedded interactive previews.
+- **Image & Avatar Uploads**: Native support for high-quality image attachments (up to 5MB) with full lightbox expansion. Configurable user profile avatars broadcast instantly to all connected clients.
+- ** Private Direct Messages (DMs)**: Dedicated sliding overlay interface for secure private conversations with full historical chat logs.
+- **Live Typing Indicators**: Real-time feedback displaying exactly who is currently typing within your active channel.
+- ** Smart Audio Notifications**: Integrated **Web Audio API** triggers discrete sound chimes for incoming messages and DMs when your window tab is out of focus.
+- ** Premium Visuals & Dark Mode**: Handcrafted pure CSS custom properties driving a highly polished **Glassmorphic** UI complete with smooth layout micro-animations and persistent theme toggling.
+- ** Fluid Mobile Experience**: Auto-collapsing bottom navigation bars, full-screen DM panels, and sliding drawer menus tailored beautifully for smaller viewports.
+- ** Database Resiliency**: Built-in automatic runtime failover to lightweight in-memory storage if remote MongoDB connections experience downtime.
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Frontend
 - **Framework**: React 18 powered by Vite 4
